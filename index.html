@@ -29,6 +29,7 @@
   }
 
   @keyframes pop { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  @keyframes jump { 0%{transform:translateY(0);}25%{transform:translateY(-15px);}50%{transform:translateY(0);}75%{transform:translateY(-8px);}100%{transform:translateY(0);} }
 
   h1 { font-size: 22px; color: #ff4e8a; }
   p { font-size: 16px; color: #444; margin-bottom: 20px; }
@@ -47,10 +48,8 @@
   .yes:hover { background: #ff236d; }
   .no { background: #ffd1e5; color: #c4004f; }
 
-  @keyframes jump { 0%{transform:translateY(0);}25%{transform:translateY(-15px);}50%{transform:translateY(0);}75%{transform:translateY(-8px);}100%{transform:translateY(0);} }
-
   img { width: 40%; max-width: 180px; margin-top: 20px; border-radius: 12px; animation: float 3s ease-in-out infinite; }
-  @keyframes float {0%{transform:translateY(0px);}50%{transform:translateY(-12px);}100%{transform:translateY(0px);}}
+  @keyframes float {0%{transform:translateY(0px);}50%{transform:translateY(-12px);}100%{transform:translateY(0px);} }
 
   .heart { position: fixed; bottom: -20px; color: #ff4e8a; font-size: 24px; animation: rise 4s linear infinite; }
   @keyframes rise {0%{transform:translateY(0) translateX(0);opacity:1;}100%{transform:translateY(-120vh) translateX(20px);opacity:0;}}
@@ -75,7 +74,7 @@
     <button class="no" id="noBtn">No 🙈</button>
   </div>
   <p id="response" style="margin-top:20px;font-size:20px;color:#ff4e8a;"></p>
-  <img src="https://media.tenor.com/HLxT5vWckJ0AAAAC/ghibli.gif" alt="Ghibli Animation">
+  <img id="mainGif" src="https://media.tenor.com/HLxT5vWckJ0AAAAC/ghibli.gif" alt="Ghibli Animation">
   <img id="yesImage" src="https://media.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif" alt="Happy Picture">
   <img id="noImage" src="https://media.giphy.com/media/3og0IPxMM0erATueVW/giphy.gif" alt="Sad Picture">
 </div>
@@ -85,68 +84,6 @@
 </audio>
 
 <script>
-  const noBtn = document.getElementById('noBtn');
-
-  // Escape button every click
-  noBtn.addEventListener('click', () => {
-    const x = Math.random() * (window.innerWidth - 150);
-    const y = Math.random() * (window.innerHeight - 150);
-    noBtn.style.position = "absolute";
-    noBtn.style.left = x + "px";
-    noBtn.style.top = y + "px";
-    noBtn.style.animation = "jump 0.4s";
-  });
-
-  // ---------------- Yes Flow ----------------
-  function firstYes() {
-    document.getElementById('question').innerText = "Are you sure you want to say Yes? 💗";
-    const buttonsDiv = document.getElementById('buttons');
-    buttonsDiv.innerHTML = `
-      <button class="yes" onclick="secondYes()">Yes, I'm sure 💕</button>
-      <button class="no" onclick="maybeLater()">Maybe later 🙈</button>
-    `;
-  }
-
-  function secondYes() {
-    document.getElementById('response').innerText = "Yay!! Can't wait! 💕✨";
-    document.getElementById('yesImage').style.display = "block";
-    document.getElementById('buttons').style.display = "none";
-    document.getElementById('question').style.display = "none";
-  }
-
-  function maybeLater() {
-    document.getElementById('response').innerText = "Okay, take your time 😳💗";
-    document.getElementById('buttons').style.display = "none";
-  }
-
-  // ---------------- No Flow ----------------
-  function firstNo() {
-    document.getElementById('question').innerText = "Are you sure you don't want to go on a date? 😢";
-    const buttonsDiv = document.getElementById('buttons');
-    buttonsDiv.innerHTML = `
-      <button class="yes" onclick="changeMind()">Wait, maybe yes 💗</button>
-      <button class="no" id="noBtnStep2">Yes, I don't want to 🙈</button>
-    `;
-    const step2No = document.getElementById('noBtnStep2');
-    step2No.addEventListener('click', () => {
-      const x = Math.random() * (window.innerWidth - 150);
-      const y = Math.random() * (window.innerHeight - 150);
-      step2No.style.position = "absolute";
-      step2No.style.left = x + "px";
-      step2No.style.top = y + "px";
-      step2No.style.animation = "jump 0.4s";
-    });
-  }
-
-  function changeMind() { firstYes(); }
-
-  function confirmNo() {
-    document.getElementById('response').innerText = "Oh no... maybe next time 😢";
-    document.getElementById('noImage').style.display = "block";
-    document.getElementById('buttons').style.display = "none";
-    document.getElementById('question').style.display = "none";
-  }
-
   // ---------------- Floating Hearts ----------------
   function createHeart() {
     const heart = document.createElement('div');
@@ -158,6 +95,64 @@
     setTimeout(()=>heart.remove(),4000);
   }
   setInterval(createHeart,600);
+
+  // ---------------- Escape Button Function ----------------
+  let escapeSpeed = 1; // multiplier for faster movement
+  function escapeButton(btn) {
+    const x = Math.random() * (window.innerWidth - 150 * escapeSpeed);
+    const y = Math.random() * (window.innerHeight - 150 * escapeSpeed);
+    btn.style.position = "absolute";
+    btn.style.left = x + "px";
+    btn.style.top = y + "px";
+    btn.style.animation = "jump 0.3s";
+    escapeSpeed += 0.1; // increase speed after each escape
+  }
+
+  // ---------------- Yes Flow ----------------
+  function firstYes() {
+    document.getElementById('question').innerText = "Are you sure you want to say Yes? 💗";
+    const buttonsDiv = document.getElementById('buttons');
+    buttonsDiv.innerHTML = `
+      <button class="yes" onclick="secondYes()">Yes, I'm sure 💕</button>
+      <button class="no" id="maybeLaterBtn">Maybe later 🙈</button>
+    `;
+
+    const maybeBtn = document.getElementById('maybeLaterBtn');
+    maybeBtn.addEventListener('click', () => escapeButton(maybeBtn));
+  }
+
+  function secondYes() {
+    document.getElementById('response').innerText = "Yay!! Can't wait! 💕✨";
+    document.getElementById('mainGif').src = "https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif"; // in-love GIF
+    document.getElementById('yesImage').style.display = "block";
+    document.getElementById('buttons').style.display = "none";
+    document.getElementById('question').style.display = "none";
+  }
+
+  // ---------------- Initial No Button ----------------
+  const noBtn = document.getElementById('noBtn');
+  noBtn.addEventListener('click', () => escapeButton(noBtn));
+
+  // ---------------- No Flow ----------------
+  function firstNo() {
+    document.getElementById('question').innerText = "Are you sure you don't want to go on a date? 😢";
+    const buttonsDiv = document.getElementById('buttons');
+    buttonsDiv.innerHTML = `
+      <button class="yes" onclick="changeMind()">Wait, maybe yes 💗</button>
+      <button class="no" id="noBtnStep2">Yes, I don't want to 🙈</button>
+    `;
+    const step2No = document.getElementById('noBtnStep2');
+    step2No.addEventListener('click', () => escapeButton(step2No));
+  }
+
+  function changeMind() { firstYes(); }
+
+  function confirmNo() {
+    document.getElementById('response').innerText = "Oh no... maybe next time 😢";
+    document.getElementById('noImage').style.display = "block";
+    document.getElementById('buttons').style.display = "none";
+    document.getElementById('question').style.display = "none";
+  }
 </script>
 </body>
 </html>
